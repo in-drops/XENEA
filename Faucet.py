@@ -11,7 +11,7 @@ from config import Chains
 from core.bot import Bot
 from utils.inputs import (
     cell_date_to_txt, get_date_from_txt,
-    input_pause, start_pause,
+    input_pause, input_cycle_amount, input_cycle_pause, start_pause,
 )
 from utils.logging import init_logger
 from utils.utils import get_accounts, random_sleep, select_and_shuffle_profiles, get_user_agent, prepare_proxy_requests
@@ -191,26 +191,33 @@ def worker(account) -> None:
 
 def main():
     init_logger()
-    accounts = get_accounts()
-    accounts = select_and_shuffle_profiles(accounts)
-    pause    = input_pause()
-    delay    = start_pause()
+    accounts     = get_accounts()
+    accounts     = select_and_shuffle_profiles(accounts)
+    pause        = input_pause()
+    cycle_amount = input_cycle_amount()
+    cycle_pause  = input_cycle_pause()
+    delay        = start_pause()
 
     if delay:
         random_sleep(delay)
 
-    active = accounts_filter(accounts)
-    if not active:
-        logger.warning('Все аккаунты уже получили фосет — кулдаун не истёк!')
-        return
+    for cycle in range(cycle_amount):
+        active = accounts_filter(accounts)
+        if not active:
+            logger.warning('Все аккаунты уже получили фосет — кулдаун не истёк!')
+            break
 
-    logger.info(f'Активных аккаунтов для фосета: {len(active)}')
+        logger.info(f'Активных аккаунтов для фосета: {len(active)}')
 
-    for account in active:
-        worker(account)
-        random_sleep(pause)
+        for account in active:
+            worker(account)
+            random_sleep(pause)
 
-    logger.success(f'Фосет завершён. Обработано аккаунтов: {len(active)} 🔥')
+        logger.success(f'Цикл {cycle + 1}/{cycle_amount} завершён ✅')
+        if cycle < cycle_amount - 1:
+            random_sleep(cycle_pause)
+
+    logger.success(f'Фосет завершён 🔥')
 
 
 if __name__ == '__main__':
