@@ -183,6 +183,7 @@ def worker(account) -> None:
         success = claim_faucet(bot)
         if success:
             cell_date_to_txt(bot, FILE_FAUCET_DATE)
+            logger.success(f'Фосет завершён 🔥')
 
 
 # ---------------------------------------------------------------------------
@@ -217,7 +218,7 @@ def main():
         if cycle < cycle_amount - 1:
             random_sleep(cycle_pause)
 
-    logger.success(f'Фосет завершён 🔥')
+
 
 
 if __name__ == '__main__':
